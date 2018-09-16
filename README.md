@@ -60,7 +60,7 @@ and `YOUR_DATASET/alignment.json` should look like:
 
 After you prepare as described, you should genearte preprocessed data with:
 
-    python3 -m datasets.generate_data ./datasets/YOUR_DATASET/alignment.json
+    python -m datasets.generate_data ./datasets/YOUR_DATASET/alignment.json
 
 
 ### 2-2. Generate Korean datasets
@@ -73,23 +73,23 @@ Follow below commands. (explain with `son` dataset)
 
 1. Download speech(or video) and text.
 
-       python3 -m datasets.son.download
+       python -m datasets.son.download
 
 2. Segment all audios on silence.
 
-       python3 -m audio.silence --audio_pattern "./datasets/son/audio/*.wav" --method=pydub
+       python -m audio.silence --audio_pattern "./datasets/son/audio/*.wav" --method=pydub
 
 3. By using [Google Speech Recognition API](https://cloud.google.com/speech/), we predict sentences for all segmented audios.
 
-       python3 -m recognition.google --audio_pattern "./datasets/son/audio/*.*.wav"
+       python -m recognition.google --audio_pattern "./datasets/son/audio/*.*.wav"
 
 4. By comparing original text and recognised text, save `audio<->text` pair information into `./datasets/son/alignment.json`.
 
-       python3 -m recognition.alignment --recognition_path "./datasets/son/recognition.json" --score_threshold=0.5
+       python -m recognition.alignment --recognition_path "./datasets/son/recognition.json" --score_threshold=0.5
 
 5. Finally, generated numpy files which will be used in training.
 
-       python3 -m datasets.generate_data ./datasets/son/alignment.json
+       python -m datasets.generate_data ./datasets/son/alignment.json
 
 Because the automatic generation is extremely naive, the dataset is noisy. However, if you have enough datasets (20+ hours with random initialization or 5+ hours with pretrained model initialization), you can expect an acceptable quality of audio synthesis.
 
@@ -99,11 +99,11 @@ Because the automatic generation is extremely naive, the dataset is noisy. Howev
 
 2. Convert metadata CSV file to json file. (arguments are available for changing preferences)
 		
-		python3 -m datasets.LJSpeech_1_0.prepare
+		python -m datasets.LJSpeech_1_0.prepare
 
 3. Finally, generate numpy files which will be used in training.
 		
-		python3 -m datasets.generate_data ./datasets/LJSpeech_1_0
+		python -m datasets.generate_data ./datasets/LJSpeech_1_0
 		
 
 ### 3. Train a model
@@ -114,17 +114,17 @@ The important hyperparameters for a models are defined in `hparams.py`.
 
 To train a single-speaker model:
 
-    python3 train.py --data_path=datasets/son
-    python3 train.py --data_path=datasets/son --initialize_path=PATH_TO_CHECKPOINT
+    python train.py --data_path=datasets/son
+    python train.py --data_path=datasets/son --initialize_path=PATH_TO_CHECKPOINT
 
 To train a multi-speaker model:
 
     # after change `model_type` in `hparams.py` to `deepvoice` or `simple`
-    python3 train.py --data_path=datasets/son1,datasets/son2
+    python train.py --data_path=datasets/son1,datasets/son2
 
 To restart a training from previous experiments such as `logs/son-20171015`:
 
-    python3 train.py --data_path=datasets/son --load_path logs/son-20171015
+    python train.py --data_path=datasets/son --load_path logs/son-20171015
 
 If you don't have good and enough (10+ hours) dataset, it would be better to use `--initialize_path` to use a well-trained model as initial parameters.
 
@@ -133,18 +133,18 @@ If you don't have good and enough (10+ hours) dataset, it would be better to use
 
 You can train your own models with:
 
-    python3 app.py --load_path logs/son-20171015 --num_speakers=1
+    python app.py --load_path logs/son-20171015 --num_speakers=1
 
 or generate audio directly with:
 
-    python3 synthesizer.py --load_path logs/son-20171015 --text "이거 실화냐?"
+    python synthesizer.py --load_path logs/son-20171015 --text "이거 실화냐?"
 	
 ### 4-1. Synthesizing non-korean(english) audio
 
 For generating non-korean audio, you must set the argument --is_korean False.
 		
-	python3 app.py --load_path logs/LJSpeech_1_0-20180108 --num_speakers=1 --is_korean=False
-	python3 synthesizer.py --load_path logs/LJSpeech_1_0-20180108 --text="Winter is coming." --is_korean=False
+	python app.py --load_path logs/LJSpeech_1_0-20180108 --num_speakers=1 --is_korean=False
+	python synthesizer.py --load_path logs/LJSpeech_1_0-20180108 --text="Winter is coming." --is_korean=False
 
 ## Results
 
